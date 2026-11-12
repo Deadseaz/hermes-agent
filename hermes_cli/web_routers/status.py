@@ -960,3 +960,18 @@ async def get_logs(
 
     result = await asyncio.to_thread(_load_logs)
     return {"file": file, "lines": result}
+
+
+@router.get("/api/ct101/overview")
+def get_ct101_overview():
+    """CT101 trading system overview: domain, C++ bridge, bot fleet, infrastructure.
+    Returns ``{\"available\": false, \"error\": \"...\"}`` when CT101 is not installed."""
+    try:
+        from hermes_agent.ct101 import overview as ct101_overview
+        data = ct101_overview()
+        data["available"] = True
+        return data
+    except ImportError as e:
+        return {"available": False, "error": f"CT101 module not available: {e}"}
+    except Exception as e:
+        return {"available": False, "error": str(e)}
