@@ -14,17 +14,18 @@ from typing import Any, Dict, List, Optional
 
 # ── Path ────────────────────────────────────────────────────────────────────
 
-_CT101_ROOT = Path(os.environ.get("CT101_ROOT", "/home/claude/timeshift/ct101")).resolve()
-if str(_CT101_ROOT) not in sys.path:
-    sys.path.insert(0, str(_CT101_ROOT))
+_CT101_ROOT = "/home/claude/timeshift/ct101"
+_HERE = Path(__file__).parent
+if _CT101_ROOT not in sys.path:
+    sys.path.insert(0, _CT101_ROOT)
 
 # ── .env ────────────────────────────────────────────────────────────────────
 
-_ENV_PATH = _CT101_ROOT / ".env"
-if _ENV_PATH.exists():
+_env_path = Path(_CT101_ROOT) / ".env"
+if _env_path.exists():
     try:
         from dotenv import load_dotenv
-        load_dotenv(str(_ENV_PATH))
+        load_dotenv(str(_env_path))
     except ImportError: pass
 
 # ── OpenSSL ─────────────────────────────────────────────────────────────────
@@ -69,7 +70,7 @@ class _Domain:
 
     def catalog(self):
         r = {}
-        ddir = _CT101_ROOT / "domain"
+        ddir = Path(_CT101_ROOT) / "domain"
         if not ddir.is_dir(): return r
         for pkg in sorted(ddir.iterdir()):
             if not pkg.is_dir() or pkg.name.startswith("_"): continue
@@ -114,7 +115,7 @@ class _CppBridge:
     def _ensure(self):
         if self._init: return
         self._init = True
-        micro = str(_CT101_ROOT / "infrastructure" / "micro")
+        micro = str(Path(_CT101_ROOT) / "infrastructure" / "micro")
         sys.path.insert(0, micro)
 
         def _L(name, key, aliases):
@@ -304,7 +305,7 @@ agents = _Agents()
 def overview():
     dc = domain.catalog(); cc = cpp.catalog()
     return {
-        "ct101_root": str(_CT101_ROOT),
+        "ct101_root": _CT101_ROOT,
         "domain": {"packages": len(dc),
                    "total_classes": sum(d["class_count"] for d in dc.values()),
                    "total_functions": sum(d["function_count"] for d in dc.values())},
